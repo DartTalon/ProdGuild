@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROD.Guild — Платформа проектного обучения и менторинга</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,500,1,0" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- ПАНЕЛЬ GOD MODE (видна ТОЛЬКО если никнейм === MasterTalon) -->
+    <div id="god-mode-bar" class="god-mode-bar hidden">
+        <div class="god-bar-left">
+            <span class="god-badge">⚡ GOD MODE: MasterTalon</span>
+            <span>Полный доступ ко всем страницам, ролям и закрытым кейсам</span>
+        </div>
+        <div class="god-bar-buttons">
+            <button class="god-chip" id="god-NOVICE" onclick="App.setGodRole('NOVICE')">Начинающий</button>
+            <button class="god-chip" id="god-BASIC" onclick="App.setGodRole('BASIC')">Базовый</button>
+            <button class="god-chip" id="god-JR_REVIEWER" onclick="App.setGodRole('JR_REVIEWER')">Нач. Ревьюер</button>
+            <button class="god-chip" id="god-EXPERT" onclick="App.setGodRole('EXPERT')">Эксперт</button>
+            <button class="god-chip" id="god-ORGANIZER" onclick="App.setGodRole('ORGANIZER')">Организатор</button>
+            <button class="god-chip" onclick="App.giveGodResources()">+100 PRODитов / Кармы</button>
+        </div>
+    </div>
+
+    <!-- ГЛАВНАЯ ШАПКА НАВИГАЦИИ -->
+    <header id="main-navbar" class="navbar hidden">
+        <a class="brand" onclick="App.navigate('profile')">
+            <span class="material-symbols-rounded brand-icon">pets</span>
+            PROD.Guild
+            <span class="brand-badge" id="nav-role-badge">Начинающий</span>
+        </a>
+
+        <nav class="nav-links">
+            <button class="nav-tab" id="tab-tasks" onclick="App.navigate('tasks')">
+                <span class="material-symbols-rounded">menu_book</span> Курсы и Задачи
+            </button>
+            <button class="nav-tab" id="tab-projects" onclick="App.navigate('projects')">
+                <span class="material-symbols-rounded">rocket_launch</span> Проекты
+                <span id="lock-projects" class="material-symbols-rounded lock-icon">lock</span>
+            </button>
+            <button class="nav-tab" id="tab-my-projects" onclick="App.navigate('my-projects')">
+                <span class="material-symbols-rounded">folder_special</span> Мои проекты
+                <span id="lock-my-projects" class="material-symbols-rounded lock-icon">lock</span>
+            </button>
+            <button class="nav-tab" id="tab-review" onclick="App.navigate('review')">
+                <span class="material-symbols-rounded">rate_review</span> Ревью
+                <span id="lock-review" class="material-symbols-rounded lock-icon">lock</span>
+            </button>
+            <button class="nav-tab hidden" id="tab-organizer" onclick="App.navigate('organizer')">
+                <span class="material-symbols-rounded">add_business</span> Управление кейсами
+            </button>
+            <button class="nav-tab" id="tab-profile" onclick="App.navigate('profile')">
+                <span class="material-symbols-rounded">person</span> Профиль
+            </button>
+        </nav>
+
+        <div class="user-quickbar">
+            <div class="stat-pill stat-karma" title="Репутация за вклад в сообщество">
+                <span class="material-symbols-rounded">workspace_premium</span>
+                <span id="header-karma">0</span> Карма
+            </div>
+            <div class="stat-pill stat-prodites" title="Внутренняя валюта PRODиты">
+                <span class="material-symbols-rounded">toll</span>
+                <span id="header-prodites">50</span> PRODитов
+            </div>
+            <button class="profile-avatar-btn" onclick="App.navigate('profile')">
+                <img id="header-avatar" src="panda_studying.webp" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Panda'" alt="Avatar">
+                <span id="header-username">Участник</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <!-- 1. ЭКРАН ПЕРВИЧНОЙ РЕГИСТРАЦИИ -->
+        <section id="page-register" class="page-section hidden">
+            <div class="card register-card">
+                <div class="center-header">
+                    <img src="panda_energetic.webp" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=EconPanda'" class="panda-illustration" alt="Welcome">
+                    <span class="badge badge-green">PROD.Guild x EconPanda</span>
+                    <h1 class="register-title">Регистрация на платформе</h1>
+                    <p class="page-subtitle">Введите <strong>MasterTalon</strong> для режима Бога или свой обычный никнейм для прохождения пути от Начинающего до Эксперта.</p>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Никнейм пользователя</label>
+                    <input type="text" id="reg-name" class="form-input" placeholder="Например: Константин или MasterTalon">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Выберите профильные предметы (можно несколько):</label>
+                    <div class="subject-selector-grid" id="reg-subjects-box">
+                        <div class="subject-check-card selected" data-subj="math" onclick="App.toggleSubjCard(this)">
+                            <span class="material-symbols-rounded subj-icon-math">functions</span>
+                            <div><div class="subj-name">Математика</div><div class="subj-sub">Теория чисел, графы</div></div>
+                        </div>
+                        <div class="subject-check-card selected" data-subj="cs" onclick="App.toggleSubjCard(this)">
+                            <span class="material-symbols-rounded subj-icon-cs">terminal</span>
+                            <div><div class="subj-name">Информатика</div><div class="subj-sub">Алгоритмы, Backend, ML</div></div>
+                        </div>
+                        <div class="subject-check-card" data-subj="physics" onclick="App.toggleSubjCard(this)">
+                            <span class="material-symbols-rounded subj-icon-phys">bolt</span>
+                            <div><div class="subj-name">Физика</div><div class="subj-sub">Электродинамика, поля</div></div>
+                        </div>
+                        <div class="subject-check-card selected" data-subj="econ" onclick="App.toggleSubjCard(this)">
+                            <span class="material-symbols-rounded subj-icon-econ">trending_up</span>
+                            <div><div class="subj-name">Экономика</div><div class="subj-sub">Микроэкономика, финансы</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Выберите ваш уровень стартового курса:</label>
+                    <select id="reg-course-level" class="form-select">
+                        <option value="1">Курс 1 — Начальный (3 ступени до проектов)</option>
+                        <option value="2">Курс 2 — Продвинутый (2 ступени до проектов)</option>
+                        <option value="3" selected>Курс 3 — Финальный базовый курс (сразу выпускные задачи)</option>
+                    </select>
+                </div>
+
+                <button class="g-btn g-btn-filled full-width-btn" onclick="App.completeRegistration()">
+                    <span class="material-symbols-rounded">rocket_launch</span> Завершить регистрацию и войти
+                </button>
+            </div>
+        </section>
+
+        <!-- 2. ВКЛАДКА ПРОФИЛЯ И РЕДАКТИРОВАНИЯ -->
+        <section id="page-profile" class="page-section hidden">
+            <div class="grid-profile">
+                <div class="profile-left-col">
+                    <div class="card center-text">
+                        <div>
+                            <img id="profile-panda-img" src="panda_studying.webp" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Profile'" class="panda-illustration" alt="Panda">
+                            <span id="profile-role-badge" class="badge badge-green">Начинающий</span>
+                            <h2 id="profile-name" class="profile-username">Участник</h2>
+                            <p id="profile-panda-mood" class="muted-small"></p>
+
+                            <div class="progress-box">
+                                <div class="progress-labels">
+                                    <span>Путь компетенций</span>
+                                    <span id="profile-next-step-label">До уровня «Базовый»</span>
+                                </div>
+                                <div class="progress-wrap">
+                                    <div id="profile-progress-bar" class="progress-fill"></div>
+                                </div>
+                                <p id="profile-access-hint" class="muted-small"></p>
+                            </div>
+                        </div>
+
+                        <div class="stack-buttons">
+                            <button class="g-btn g-btn-tonal" onclick="App.toggleEditProfile()">
+                                <span class="material-symbols-rounded">edit</span> Редактировать профиль
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Блок редактирования профиля -->
+                    <div id="profile-edit-card" class="card hidden">
+                        <h3 class="card-title mb-14">Редактирование профиля</h3>
+                        <div class="form-group">
+                            <label class="form-label">Никнейм (`MasterTalon` = Режим Бога)</label>
+                            <input type="text" id="edit-name" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Профильные предметы:</label>
+                            <div class="subject-selector-grid" id="edit-subjects-box">
+                                <div class="subject-check-card" data-subj="math" onclick="App.toggleSubjCard(this)"><strong>Математика</strong></div>
+                                <div class="subject-check-card" data-subj="cs" onclick="App.toggleSubjCard(this)"><strong>Информатика</strong></div>
+                                <div class="subject-check-card" data-subj="physics" onclick="App.toggleSubjCard(this)"><strong>Физика</strong></div>
+                                <div class="subject-check-card" data-subj="econ" onclick="App.toggleSubjCard(this)"><strong>Экономика</strong></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Текущий курс:</label>
+                            <select id="edit-course-level" class="form-select">
+                                <option value="1">Курс 1 — Начальный</option>
+                                <option value="2">Курс 2 — Продвинутый</option>
+                                <option value="3">Курс 3 — Финальный базовый курс</option>
+                            </select>
+                        </div>
+                        <div class="stack-buttons">
+                            <button class="g-btn g-btn-filled" onclick="App.saveProfileChanges()">
+                                <span class="material-symbols-rounded">save</span> Сохранить настройки
+                            </button>
+                            <button class="g-btn g-btn-outlined danger-text" onclick="App.resetFullAccount()">
+                                <span class="material-symbols-rounded">delete_forever</span> Сбросить данные и выйти
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Правая часть профиля: Предметы, Компетенции ревью и История -->
+                <div class="profile-right-col">
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <h3 class="card-title">Мои профильные предметы и права ревью</h3>
+                                <p class="muted-small">Откройте страницу предмета, чтобы пройти курс или подтвердить квалификацию ревьюера</p>
+                            </div>
+                        </div>
+                        <div id="profile-subjects-grid" class="grid-2"></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Транзакционная история Кармы и PRODитов</h3>
+                            <span class="badge badge-blue">Журнал операций</span>
+                        </div>
+                        <div id="profile-history-list" class="history-list"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. СТРАНИЦА ПРЕДМЕТА (Тренажер курса + Аттестация на ревьюера) -->
+        <section id="page-subject" class="page-section hidden">
+            <div class="page-header">
+                <div>
+                    <button class="g-btn g-btn-outlined btn-sm mb-10" onclick="App.navigate('profile')">
+                        <span class="material-symbols-rounded">arrow_back</span> Назад в профиль
+                    </button>
+                    <h1 class="page-title" id="subj-page-title">Предмет</h1>
+                    <p class="page-subtitle">Пройдите все задачи Курса 3 для получения уровня «Базовый» и открытия каталога проектов</p>
+                </div>
+                <div class="stage-buttons">
+                    <button class="g-btn g-btn-outlined" id="stage-btn-1" onclick="App.setCourseStage(1)">Курс 1</button>
+                    <button class="g-btn g-btn-outlined" id="stage-btn-2" onclick="App.setCourseStage(2)">Курс 2</button>
+                    <button class="g-btn g-btn-filled" id="stage-btn-3" onclick="App.setCourseStage(3)">Курс 3 (Выпускной)</button>
+                </div>
+            </div>
+
+            <!-- Баннер сдачи экзамена на право ревью по этому предмету -->
+            <div id="subject-reviewer-exam-box" class="card mb-20 hidden">
+                <div class="flex-between">
+                    <div>
+                        <span class="badge badge-blue">Развитие компетенций в предмете</span>
+                        <h3 class="card-title mt-6">Получить право ревью в этой предметной области</h3>
+                        <p class="muted-small">Вы уже прошли базовый курс! Выполните тестовый разбор задачи, чтобы проверять работы других участников по этому предмету.</p>
+                    </div>
+                    <button class="g-btn g-btn-filled" onclick="App.openReviewerQualificationModal()">
+                        <span class="material-symbols-rounded">verified</span> Сдать квалификацию ревьюера
+                    </button>
+                </div>
+            </div>
+
+            <div id="subject-questions-grid" class="grid-2"></div>
+        </section>
+
+        <!-- 4. ОБЩАЯ ВКЛАДКА ЗАДАЧ И КУРСОВ -->
+        <section id="page-tasks" class="page-section hidden">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Предметные курсы и база задач</h1>
+                    <p class="page-subtitle">Выберите направление для прохождения курса и подготовки к проектам</p>
+                </div>
+            </div>
+            <div id="all-subjects-overview" class="grid-2"></div>
+        </section>
+
+        <!-- 5. КАТАЛОГ ПРОЕКТОВ -->
+        <section id="page-projects" class="page-section hidden">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Каталог проектных кейсов</h1>
+                    <p class="page-subtitle">Индивидуальное выполнение практических проектов с экспертным и кросс-ревью</p>
+                </div>
+                <span class="badge badge-green" id="projects-access-indicator">Каталог</span>
+            </div>
+
+            <div id="projects-locked-view" class="locked-banner hidden">
+                <img src="panda_tired.webp" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=Locked'" class="panda-illustration" alt="Locked">
+                <span class="badge badge-red"><span class="material-symbols-rounded">lock</span> Доступно с уровня «Базовый»</span>
+                <h2 class="locked-title">Завершите финальный базовый курс!</h2>
+                <p class="locked-desc">На уровне «Начинающий» вы решаете задачи из базы предмета. Как только вы решите выпускную задачу Курса 3, откроется доступ к проектам организаторов.</p>
+                <button class="g-btn g-btn-filled" onclick="App.openFirstSelectedSubject()">
+                    <span class="material-symbols-rounded">school</span> Перейти к курсу предмета
+                </button>
+            </div>
+
+            <div id="projects-cards-grid" class="grid-3"></div>
+        </section>
+
+        <!-- 6. МОИ ПРОЕКТЫ (Отправки и результаты проверки) -->
+        <section id="page-my-projects" class="page-section hidden">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Мои проекты и обратная связь</h1>
+                    <p class="page-subtitle">Отслеживайте статус ваших посылок, оценки и рекомендации ревьюеров</p>
+                </div>
+            </div>
+            <div id="my-projects-locked-view" class="locked-banner hidden">
+                <h3>Раздел откроется после получения уровня «Базовый»</h3>
+            </div>
+            <div id="my-projects-list" class="grid-2"></div>
+        </section>
+
+        <!-- 7. РЕВЬЮ И МЕНТОРИНГ -->
+        <section id="page-review" class="page-section hidden">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Ревью проектов и Менторинг</h1>
+                    <p class="page-subtitle">Скачивайте посылки участников, выставляйте оценку и пишите содержательный фидбек</p>
+                </div>
+            </div>
+
+            <div id="review-locked-view" class="locked-banner hidden">
+                <img src="panda_meditating.webp" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=RevLock'" class="panda-illustration" alt="Review Locked">
+                <span class="badge badge-amber"><span class="material-symbols-rounded">lock</span> Требуется подтвержденное право ревью</span>
+                <h2 class="locked-title">Станьте ревьюером в своей предметной области</h2>
+                <p class="locked-desc">Перейдите на страницу своего предмета и пройдите проверку готовности к ревью, чтобы оценивать решения других участников и получать PRODиты.</p>
+                <button class="g-btn g-btn-filled" onclick="App.openFirstSelectedSubject()">
+                    <span class="material-symbols-rounded">verified</span> Перейти к аттестации в предмете
+                </button>
+            </div>
+
+            <div id="review-active-view">
+                <h3 class="mb-14">Доступные посылки на проверку в ваших областях компетенций</h3>
+                <div id="review-queue-grid" class="grid-2 mb-32"></div>
+
+                <!-- Блок Менторинга (Виден Эксперту и MasterTalon) -->
+                <div id="expert-mentoring-block" class="hidden">
+                    <div class="page-header">
+                        <div>
+                            <span class="badge badge-purple">Сценарий Менторинга (Роль: Эксперт)</span>
+                            <h2 class="page-title mt-6">Оценка готовности начинающих ревьюеров</h2>
+                            <p class="page-subtitle">Проверьте пробные разборы кандидатов и оставьте обучающее заключение для выдачи прав ревью</p>
+                        </div>
+                    </div>
+                    <div id="mentoring-candidates-grid" class="grid-2"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. ПАНЕЛЬ ОРГАНИЗАТОРА (Создание и публикация кейсов) -->
+        <section id="page-organizer" class="page-section hidden">
+            <div class="page-header">
+                <div>
+                    <span class="badge badge-purple">Интерфейс Организатора</span>
+                    <h1 class="page-title">Управление проектными кейсами</h1>
+                    <p class="page-subtitle">Создавайте черновики и публикуйте проектные кейсы для участников</p>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h3 class="card-title mb-14">Новый проектный кейс</h3>
+                    <div class="form-group">
+                        <label class="form-label">Название кейса *</label>
+                        <input type="text" id="org-proj-title" class="form-input" placeholder="Например: Оптимизация маршрутизации пакетов">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Область компетенций *</label>
+                        <select id="org-proj-subj" class="form-select">
+                            <option value="cs">Информатика</option>
+                            <option value="math">Математика</option>
+                            <option value="physics">Физика</option>
+                            <option value="econ">Экономика</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Уровень сложности кейса *</label>
+                        <select id="org-proj-level" class="form-select">
+                            <option value="BASIC">Базовый проект (Для всех Исполнителей)</option>
+                            <option value="JR_REVIEWER">Продвинутый проект (Для Нач. Ревьюеров и выше)</option>
+                            <option value="EXPERT">Сложный проект (Проверяется Экспертами)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Описание задачи и ожидаемый результат *</label>
+                        <textarea id="org-proj-desc" class="form-textarea" rows="3" placeholder="Опишите постановку задачи, критерии и ожидаемый формат результата..."></textarea>
+                    </div>
+                    <div class="flex-gap">
+                        <button class="g-btn g-btn-filled" onclick="App.createOrganizerCase(true)">
+                            <span class="material-symbols-rounded">publish</span> Опубликовать сразу
+                        </button>
+                        <button class="g-btn g-btn-outlined" onclick="App.createOrganizerCase(false)">
+                            <span class="material-symbols-rounded">draft</span> Сохранить как черновик
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title mb-14">Все кейсы организатора (включая неопубликованные черновики)</h3>
+                    <div id="organizer-cases-list" class="history-list"></div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- МОДАЛЬНОЕ ОКНО КОНТЕСТ-ПОСЫЛКИ ФАЙЛА ПРОЕКТА -->
+    <div id="submission-modal" class="modal-overlay hidden" onclick="App.closeModalOnBg(event, 'submission-modal')">
+        <div class="modal-window">
+            <div class="card-header">
+                <div>
+                    <span class="badge badge-blue">Индивидуальная отправка решения</span>
+                    <h3 id="modal-proj-title" class="card-title mt-6">Название проекта</h3>
+                </div>
+                <button class="g-btn g-btn-outlined btn-sm" onclick="App.closeModal('submission-modal')">✕</button>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Среда / Формат результата</label>
+                <select id="modal-compiler" class="form-select">
+                    <option value="ZIP Archive (Full Project)">Архив проекта (.zip / .tar.gz)</option>
+                    <option value="Kotlin / Java 21">Kotlin / Java (Исходный код)</option>
+                    <option value="Python 3.12 / Jupyter">Python 3.12 / Jupyter (.py / .ipynb)</option>
+                    <option value="PDF / Analytical Report">Аналитическое решение (.pdf / .tex)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Прикрепите файл выполненного проекта *</label>
+                <input type="file" id="modal-file-input" class="hidden" onchange="App.handleContestFileSelect(this)">
+                <div id="modal-dropzone" class="file-dropzone" onclick="document.getElementById('modal-file-input').click()">
+                    <span class="material-symbols-rounded upload-icon">upload_file</span>
+                    <div id="modal-file-label" class="dropzone-title">Нажмите, чтобы выбрать файл решения</div>
+                    <div class="muted-small">Файл сохранится в посылке и будет доступен ревьюеру для скачивания</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Комментарий автору ревью / Ссылка на репозиторий</label>
+                <input type="text" id="modal-comment" class="form-input" placeholder="Краткое описание архитектуры или ссылка на GitHub">
+            </div>
+
+            <div class="card-footer">
+                <span class="muted-small">Стоимость запроса ревью: <strong id="modal-cost-label">10 PRODитов</strong></span>
+                <div class="flex-gap">
+                    <button class="g-btn g-btn-outlined" onclick="App.closeModal('submission-modal')">Отмена</button>
+                    <button class="g-btn g-btn-filled" onclick="App.submitContestSolution()">
+                        <span class="material-symbols-rounded">send</span> Отправить на ревью
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО КВАЛИФИКАЦИИ НА РЕВЬЮЕРА -->
+    <div id="qualification-modal" class="modal-overlay hidden" onclick="App.closeModalOnBg(event, 'qualification-modal')">
+        <div class="modal-window">
+            <div class="card-header">
+                <div>
+                    <span class="badge badge-purple">Проверка готовности к ревью</span>
+                    <h3 class="card-title mt-6" id="qual-modal-title">Квалификационное задание ревьюера</h3>
+                </div>
+                <button class="g-btn g-btn-outlined btn-sm" onclick="App.closeModal('qualification-modal')">✕</button>
+            </div>
+            <p class="card-desc">
+                Оцените тестовый фрагмент решения участника: <em>«Использован полный перебор за O(2^N) без мемоизации, отсутствует обработка пустого входа, секретный токен БД захардкожен в коде»</em>. Напишите ваше пробное ревью:
+            </p>
+            <div class="form-group">
+                <label class="form-label">Ваше пробное заключение ревьюера *</label>
+                <textarea id="qual-review-text" class="form-textarea" rows="3" placeholder="Укажите найденные ошибки и рекомендации по исправлению..."></textarea>
+            </div>
+            <div class="card-footer">
+                <span class="muted-small">После отправки вы получите статус «Начинающий ревьюер», а запись поступит Эксперту на менторинг</span>
+                <button class="g-btn g-btn-filled" onclick="App.submitReviewerQualification()">
+                    <span class="material-symbols-rounded">verified</span> Отправить и получить право ревью
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script src="api.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
